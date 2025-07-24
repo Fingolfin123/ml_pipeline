@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "e2emlproject"
+version = "0.0.1"
+authors = [
+    { name = "ben", email = "bengisla123@gmail.com" }
+]
+description = "Your project description here"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "pandas",
+    "numpy",
+    "seaborn",
+    "scikit-learn",
+    "catboost",
+    "xgboost",
+    "dill",
+    "joblib",
+    "flask"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
