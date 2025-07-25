@@ -7,6 +7,11 @@ class DataSource(ABC):
         """Read data and return as a Spark DataFrame."""
         pass
 
+    @abstractmethod
+    def write(self, df: DataFrame):
+        """Write a Spark DataFrame to the data source."""
+        pass
+    
     def generate_sample_table(self):
         """Default sample table creation using pandas. Override in subclasses for source-specific implementations."""
         sample_df = pd.DataFrame({
@@ -15,3 +20,4 @@ class DataSource(ABC):
             "score": [85.5, 92.0, 78.3]
         })
         return sample_df
+    

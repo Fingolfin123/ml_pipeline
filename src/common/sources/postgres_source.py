@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from common.sources.datasource_base import DataSource
 
 class PostgreSQLSource(DataSource):
-    def load(self):
+    def read(self):
         user = self.config["user"]
         password = self.config["password"]
         host = self.config.get("host", "localhost")
@@ -17,6 +17,9 @@ class PostgreSQLSource(DataSource):
         with engine.connect() as conn:
             df = pd.read_sql(query, conn)
         return df
+
+    def write(self, df):
+        df.write.format("jdbc").options(**self.config).mode("overwrite").save()
 
     def generate_sample_table(self):
         sample_df = super().generate_sample_table()

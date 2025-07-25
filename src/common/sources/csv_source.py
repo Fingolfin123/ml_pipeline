@@ -2,11 +2,16 @@ import pandas as pd
 from common.sources.datasource_base import DataSource
 
 class CSVSource(DataSource):
-    def load(self):
+    def read(self):
         path = self.config["path"]
         options = self.config.get("options", {})
         return pd.read_csv(path, **options)
-
+    
+    def write(self, df):
+        path = self.config["path"]
+        options = self.config.get("write_options", {"header": "true"})
+        df.write.options(**options).csv(path)
+        
     def generate_sample_table(self):
         sample_df = super().generate_sample_table()
         path = self.config.get("path", "sample.csv")
