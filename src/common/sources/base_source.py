@@ -1,27 +1,30 @@
-from abc import ABC, abstractmethod
 import pandas as pd
 from pandas import DataFrame
 
-class DataSource(ABC):
+from src.common.monitoring.logger import logging
+
+class DataSource:
     def __init__(self, config: dict):
         """
         Initialize the data source with a configuration dictionary.
         """
         self.config = config
 
-    @abstractmethod
-    def read(self) -> DataFrame:
-        """
-        Read data and return as a pandas DataFrame.
-        """
-        pass
+    def read(self):
+        path = self.config["path"]
+        logging.info(f"Reading data from: {path}")
+        return self._read()
 
-    @abstractmethod
-    def write(self, df: DataFrame):
-        """
-        Write a pandas DataFrame to the data source.
-        """
-        pass
+    def write(self, df):
+        path = self.config["path"]
+        logging.info(f"Writing data to: {path}")
+        return self._write(df)
+
+    def _read(self):
+        raise NotImplementedError
+
+    def _write(self, df):
+        raise NotImplementedError
 
     def generate_sample_table(self) -> DataFrame:
         """

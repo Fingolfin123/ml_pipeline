@@ -8,7 +8,7 @@ from src.common.exception import CustomException
 
 from src.common.sources.csv_source import CSVSource
 # from common.sources.parquet_source import ParquetSource  # Uncomment if implemented
-# from common.sources.json_source import JSONSource        # Uncomment if implemented
+from src.common.sources.json_source import JSONSource        # Uncomment if implemented
 
 @pytest.mark.parametrize("source_class, extension, config_overrides", [
     (CSVSource, ".csv", {
@@ -20,10 +20,10 @@ from src.common.sources.csv_source import CSVSource
     #     "options": {},
     #     "write_options": {}
     # }),
-    # (JSONSource, ".json", {
-    #     "options": {},
-    #     "write_options": {}
-    # }),
+    (JSONSource, ".json", {
+        "options": {},
+        "write_options": {}
+    }),
 ])
 def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overrides):
     logging.info("Running DataSource Rountrip Test")    

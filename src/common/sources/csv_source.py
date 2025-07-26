@@ -2,12 +2,12 @@ import pandas as pd
 from src.common.sources.base_source import DataSource
 
 class CSVSource(DataSource):
-    def read(self):
+    def _read(self):
         path = self.config["path"]
         options = self.config.get("options", {})
         return pd.read_csv(path, **options)
     
-    def write(self, df):
+    def _write(self, df):
         path = self.config["path"]
         print(path)
         options = self.config.get("write_options", {})
