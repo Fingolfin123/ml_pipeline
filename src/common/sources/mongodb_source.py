@@ -1,6 +1,6 @@
 import pandas as pd
 from pymongo import MongoClient
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class MongoDBSource(DataSource):
     def load(self):

@@ -1,6 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class PostgreSQLSource(DataSource):
     def read(self):

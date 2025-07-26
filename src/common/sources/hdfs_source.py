@@ -1,7 +1,7 @@
 import pandas as pd
 import pyarrow as pa
 import pyarrow.fs as fs
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class HDFSSource(DataSource):
     def load(self):

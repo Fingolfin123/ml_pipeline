@@ -1,5 +1,5 @@
 import pandas as pd
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class CSVSource(DataSource):
     def read(self):
@@ -9,12 +9,11 @@ class CSVSource(DataSource):
     
     def write(self, df):
         path = self.config["path"]
-        options = self.config.get("write_options", {"header": "true"})
-        df.write.options(**options).csv(path)
+        print(path)
+        options = self.config.get("write_options", {})
+        df.to_csv(path, index=False, **options)
         
     def generate_sample_table(self):
         sample_df = super().generate_sample_table()
-        path = self.config.get("path", "sample.csv")
-        options = self.config.get("options", {})
-        sample_df.to_csv(path, index=False, **options)
-        print(f"Sample CSV written to: {path}")
+        self.write(sample_df)
+        return sample_df

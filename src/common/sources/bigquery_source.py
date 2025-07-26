@@ -1,7 +1,7 @@
 import pandas as pd
 from google.cloud import bigquery
 from google.oauth2 import service_account
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class BigQuerySource(DataSource):
     def load(self):
