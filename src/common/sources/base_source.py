@@ -11,6 +11,7 @@ class DataSource:
         Initialize the data source with a configuration dictionary.
         """
         self.config = config
+        self.source_type = None
 
     def read(self):
         path = self.config["path"]
