@@ -7,26 +7,26 @@ from src.common.monitoring.logger import logging
 from src.common.exception import CustomException
 
 from src.common.sources.csv_source import CSVSource
-# from common.sources.parquet_source import ParquetSource  # Uncomment if implemented
-from src.common.sources.json_source import JSONSource        # Uncomment if implemented
+from src.common.sources.json_source import JSONSource
+from src.common.sources.joblib_source import JoblibSource  # ✅ Add this line
 
 @pytest.mark.parametrize("source_class, extension, config_overrides", [
     (CSVSource, ".csv", {
         "options": {},
         "write_options": {"header": True}
     }),
-    # Uncomment and configure if you implement these:
-    # (ParquetSource, ".parquet", {
-    #     "options": {},
-    #     "write_options": {}
-    # }),
     (JSONSource, ".json", {
         "options": {},
         "write_options": {}
     }),
+    (JoblibSource, ".joblib", {  # ✅ New joblib test case
+        "options": {},
+        "write_options": {"compress": 3, "protocol": 4}  # Optional
+    }),
 ])
 def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overrides):
-    logging.info("Running DataSource Rountrip Test")    
+    logging.info(f"Running DataSource Roundtrip Test for {source_class.__name__}")
+    
     try:
         # Create a simple DataFrame for testing
         df = pd.DataFrame({
@@ -55,6 +55,6 @@ def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overr
             result_df.reset_index(drop=True),
             check_dtype=False
         )
-    
+
     except Exception as e:
-        raise CustomException(e,sys)
+        raise CustomException(e, sys)
