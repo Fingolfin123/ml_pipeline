@@ -8,7 +8,8 @@ from src.common.exception import CustomException
 
 from src.common.sources.csv_source import CSVSource
 from src.common.sources.json_source import JSONSource
-from src.common.sources.joblib_source import JoblibSource  # ✅ Add this line
+from src.common.sources.pickle_source import PickleSource
+from src.common.sources.joblib_source import JoblibSource  # import Joblib source
 
 @pytest.mark.parametrize("source_class, extension, config_overrides", [
     (CSVSource, ".csv", {
@@ -19,14 +20,17 @@ from src.common.sources.joblib_source import JoblibSource  # ✅ Add this line
         "options": {},
         "write_options": {}
     }),
-    (JoblibSource, ".joblib", {  # ✅ New joblib test case
+    (PickleSource, ".pkl", {
         "options": {},
-        "write_options": {"compress": 3, "protocol": 4}  # Optional
+        "write_options": {}
+    }),
+    (JoblibSource, ".joblib", {
+        "options": {},
+        "write_options": {}
     }),
 ])
 def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overrides):
-    logging.info(f"Running DataSource Roundtrip Test for {source_class.__name__}")
-    
+    logging.info("Running DataSource Roundtrip Test")    
     try:
         # Create a simple DataFrame for testing
         df = pd.DataFrame({
@@ -55,6 +59,6 @@ def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overr
             result_df.reset_index(drop=True),
             check_dtype=False
         )
-
+    
     except Exception as e:
         raise CustomException(e, sys)

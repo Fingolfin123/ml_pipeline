@@ -1,7 +1,9 @@
+import sys
 import pandas as pd
 from pandas import DataFrame
 
 from src.common.monitoring.logger import logging
+from src.common.exception import CustomException
 
 class DataSource:
     def __init__(self, config: dict):
@@ -13,12 +15,18 @@ class DataSource:
     def read(self):
         path = self.config["path"]
         logging.info(f"Reading data from: {path}")
-        return self._read()
+        try:
+            return self._read()
+        except Exception as e:
+            raise CustomException(e, sys)
 
     def write(self, df):
         path = self.config["path"]
         logging.info(f"Writing data to: {path}")
-        return self._write(df)
+        try:
+            return self._write(df)
+        except Exception as e:
+            raise CustomException(e, sys)
 
     def _read(self):
         raise NotImplementedError
