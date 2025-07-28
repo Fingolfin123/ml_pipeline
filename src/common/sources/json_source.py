@@ -2,14 +2,12 @@ import pandas as pd
 from src.common.sources.base_source import DataSource
 
 class JSONSource(DataSource):
-    def _read(self):
-        path = self.config["path"]
+    def _read(self, path:str):
         options = self.config.get("options", {})
         lines = self.config.get("lines", False)
         return pd.read_json(path, lines=lines, **options)
 
-    def _write(self, df):
-        path = self.config["path"]
+    def _write(self, df, path:str):
         options = self.config.get("write_options", {}).copy()
         lines = self.config.get("lines", False)
 

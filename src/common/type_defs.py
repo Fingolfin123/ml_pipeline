@@ -1,9 +1,9 @@
 from enum import Enum
 
-from common.sources.csv_source import CSVSource
-from common.sources.json_source import JSONSource
-from common.sources.joblib_source import JoblibSource
-from common.sources.pickle_source import PickleSource
+from src.common.sources.csv_source import CSVSource
+from src.common.sources.json_source import JSONSource
+from src.common.sources.joblib_source import JoblibSource
+from src.common.sources.pickle_source import PickleSource
 # from common.sources.sql_source import SQLSource
 # from common.sources.api_source import APISource
 # from common.sources.s3_source import S3Source

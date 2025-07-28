@@ -1,3 +1,4 @@
+import os
 import sys
 import pandas as pd
 from pandas import DataFrame
@@ -13,19 +14,34 @@ class DataSource:
         self.config = config
         self.source_type = None
 
-    def read(self):
-        path = self.config["path"]
+    def update_io_config(self, override_config: dict = None):
+        """
+        Merge self.config with an optional override_config dict.
+        """
+        base_config = self.config.copy()
+        if override_config:
+            base_config.update(override_config)
+        return base_config
+
+
+    def read(self, path:str = None):
+        path = self.config["path"] if path is None else path
         logging.info(f"Reading data from: {path}")
         try:
-            return self._read()
+            return self._read(path)
         except Exception as e:
             raise CustomException(e, sys)
 
-    def write(self, df):
-        path = self.config["path"]
+    def write(self, df, path:str = None):
+        path = self.config["path"] if path is None else path
+        directory = os.path.dirname(path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)  # Create dirs if missing
+            logging.info(f"Created directory: {directory}")
+        
         logging.info(f"Writing data to: {path}")
         try:
-            return self._write(df)
+            return self._write(df, path)
         except Exception as e:
             raise CustomException(e, sys)
 
@@ -45,3 +61,4 @@ class DataSource:
             "name": ["Alice", "Bob", "Charlie"],
             "score": [85.5, 92.0, 78.3]
         })
+    

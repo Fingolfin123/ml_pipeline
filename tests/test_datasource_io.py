@@ -50,8 +50,8 @@ def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overr
 
         # Initialize and run roundtrip
         source = source_class(config=config)
-        source.write(df)
-        result_df = source.read()
+        source.write(df, config["path"])
+        result_df = source.read(config["path"])
 
         # Assert roundtrip data matches original
         pd.testing.assert_frame_equal(

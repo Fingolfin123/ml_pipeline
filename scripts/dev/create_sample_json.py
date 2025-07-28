@@ -17,5 +17,6 @@ config = {
 # Instantiate and generate/write sample
 source = JSONSource(config)
 df = source.generate_sample_table()
+df = source.read(config['path'])
 
 print(df)
