@@ -16,3 +16,12 @@ class SourceClassMap(Enum):
     # SQL = SQLSource
     # API = APISource
     # S3 = S3Source
+    
+class SourceClassExt(Enum):
+    CSV = "csv"
+    JSON = "json"
+    JOBLIB = "joblib"
+    PICKLE = "pkl"
+    # SQL = SQLSource
+    # API = APISource
+    # S3 = S3Source
