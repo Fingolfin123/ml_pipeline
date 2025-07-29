@@ -4,6 +4,7 @@ import os
 from src.common.exception import CustomException
 # from src.utils import load_object
 from src.common.type_defs import SourceClassMap
+from src.components.ingestion.ingestion import IngestionManager
 
 def get_available_source_types():
     return [member.name for member in SourceClassMap]
@@ -13,25 +14,111 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+import os
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "ml_pipeline", "data")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+UPLOAD_FOLDER = "data"
+ARCHIVE_FOLDER = "archive"
+EDA_FOLDER = "static/eda_results"
+
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["ARCHIVE_FOLDER"] = ARCHIVE_FOLDER
+app.config["EDA_FOLDER"] = EDA_FOLDER
 
 @app.route('/ingest-data', methods=['GET', 'POST'])
 def ingest():
+    message = None
+    eda_head = None
+    eda_shape = None
+    eda_images = []
+    eda_summary = None
+
     if request.method == 'POST':
         uploaded_file = request.files.get('file')
 
         if uploaded_file and uploaded_file.filename != '':
+            # Run ingestion
             file_path = os.path.join(app.config["UPLOAD_FOLDER"], uploaded_file.filename)
-            # uploaded_file.save(file_path)
-            return f"✅ File uploaded to: {file_path}"
+            obj = IngestionManager(
+                source_enum=SourceClassMap.CSV,
+                source_config={"path": file_path}
+            )
+            df_raw, df_train, df_test = obj.run()
 
-        return "⚠️ No file selected."
+            archive_path = os.path.join(
+                app.config["ARCHIVE_FOLDER"],
+                uploaded_file.filename.rsplit('.', 1)[0],
+                uploaded_file.filename
+            )
+            message = (
+                f"✅ File ingested into raw, training, and testing tables. "
+                f"File archived to: {archive_path}"
+            )
 
-    # GET request shows the upload form
-    return render_template("ingest.html")
+            # Run EDA
+            eda_head, eda_shape, eda_images, eda_summary = run_full_eda(df_raw)
+
+        else:
+            message = "⚠️ No file selected."
+
+    return render_template(
+        "ingest.html",
+        message=message,
+        eda_head=eda_head, 
+        eda_shape=eda_shape,
+        eda_images=eda_images,
+        eda_summary=eda_summary
+        
+    )
+def run_full_eda(df: pd.DataFrame):
+    os.makedirs(app.config["EDA_FOLDER"], exist_ok=True)
+    eda_images = []
+
+    # Show first few rows
+    eda_head = df.head().to_html(classes="table table-striped table-bordered", border=0)
+
+    # Show shape
+    eda_shape = f"Rows: {df.shape[0]}, Columns: {df.shape[1]}"
+
+    # Summary statistics
+    eda_df = df.describe(include="all")
+
+    # Add a row for null counts
+    eda_df.loc['null_count'] = df.isnull().sum()
+
+    # Convert to HTML
+    eda_summary = eda_df.to_html(classes="table table-striped table-bordered", border=0)    
+
+    # Numeric columns
+    numeric_cols = df.select_dtypes(include='number').columns
+
+    for num_col in numeric_cols:
+        plt.figure(figsize=(8, 6))
+        sns.histplot(df[num_col], kde=True, color='blue')
+        plt.title(f"Distribution of {num_col}")
+        filename = f"{num_col}_distribution.png"
+        save_path = os.path.join(app.config["EDA_FOLDER"], filename)
+        plt.savefig(save_path)
+        plt.close()
+
+        # Store relative path for HTML
+        eda_images.append(f"static/eda_results/{filename}")
+
+    if len(numeric_cols) > 1:
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(df[numeric_cols].corr(), annot=True, cmap='coolwarm')
+        filename = f"correlation_heatmap.png"
+        save_path = os.path.join(app.config["EDA_FOLDER"], filename)
+        plt.savefig(save_path)
+        plt.close()
+
+        # Store relative path for HTML
+        eda_images.append(f"static/eda_results/{filename}")
+
+    return eda_head, eda_shape, eda_images, eda_summary
+
 
 @app.route('/train-data', methods=['GET', 'POST'])
 def training_datapoint():
