@@ -39,10 +39,21 @@ def ingest():
         uploaded_file = request.files.get('file')
 
         if uploaded_file and uploaded_file.filename != '':
-            # Run ingestion
+            # Extract file extension
+            ext = uploaded_file.filename.rsplit('.', 1)[-1]
+
+            try:
+                source_enum = SourceClassMap.from_extension(ext)
+            except ValueError as e:
+                return str(e), 400
+
+            # Save uploaded file
             file_path = os.path.join(app.config["UPLOAD_FOLDER"], uploaded_file.filename)
+            uploaded_file.save(file_path)
+
+            # Run ingestion
             obj = IngestionManager(
-                source_enum=SourceClassMap.CSV,
+                source_enum=source_enum,
                 source_config={"path": file_path}
             )
             df_raw, df_train, df_test = obj.run()

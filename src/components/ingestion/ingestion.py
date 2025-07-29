@@ -23,7 +23,7 @@ class IngestionManager:
         self.source_config = source_config
 
         # Initialize the source class object
-        self.source_class = self.source_enum.value
+        self.source_class = self.source_enum.cls
         self.source = self.source_class(self.source_config)        
 
     def initiate_data_ingestion(self):

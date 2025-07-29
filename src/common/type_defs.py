@@ -8,20 +8,23 @@ from src.common.sources.pickle_source import PickleSource
 # from common.sources.api_source import APISource
 # from common.sources.s3_source import S3Source
 
+
 class SourceClassMap(Enum):
-    CSV = CSVSource
-    JSON = JSONSource
-    JOBLIB = JoblibSource
-    PICKLE = PickleSource
-    # SQL = SQLSource
-    # API = APISource
-    # S3 = S3Source
-    
-class SourceClassExt(Enum):
-    CSV = "csv"
-    JSON = "json"
-    JOBLIB = "joblib"
-    PICKLE = "pkl"
-    # SQL = SQLSource
-    # API = APISource
-    # S3 = S3Source
+    CSV = ("csv", CSVSource)
+    JSON = ("json", JSONSource)
+    JOBLIB = ("joblib", JoblibSource)
+    PICKLE = ("pkl", PickleSource)
+
+    def __init__(self, ext, cls):
+        self.ext = ext
+        self.cls = cls
+
+    @classmethod
+    def from_extension(cls, ext: str):
+        """Return enum member based on file extension."""
+        ext = ext.lower()
+        for member in cls:
+            if member.ext == ext:
+                return member
+        raise ValueError(f"Unsupported file extension: {ext}")
+
