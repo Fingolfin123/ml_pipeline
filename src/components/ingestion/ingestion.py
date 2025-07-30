@@ -12,9 +12,9 @@ from dataclasses import dataclass
 
 @dataclass
 class DataIngestConfig:
-    train_data_path: str=os.path.join('artifacts',"train.csv")
-    test_data_path: str=os.path.join('artifacts',"test.csv")
-    raw_data_path: str=os.path.join('artifacts',"raw.csv")
+    train_data_path: str=os.path.join('model_run',"train.csv")
+    test_data_path: str=os.path.join('model_run',"test.csv")
+    raw_data_path: str=os.path.join('model_run',"raw.csv")
 
 class IngestionManager:
     def __init__(self, source_enum: SourceClassMap, source_config: dict):

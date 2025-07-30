@@ -132,6 +132,8 @@ celerybeat.pid
 .env
 .venv
 artifacts/
+model_run/
+static/eda_results/
 env/
 venv/
 ENV/

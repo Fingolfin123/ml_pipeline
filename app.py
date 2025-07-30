@@ -20,11 +20,11 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 UPLOAD_FOLDER = "data"
-ARCHIVE_FOLDER = "archive"
+MODEL_RUN_FOLDER = "model_run"
 EDA_FOLDER = "static/eda_results"
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["ARCHIVE_FOLDER"] = ARCHIVE_FOLDER
+app.config["MODEL_RUN_FOLDER"] = MODEL_RUN_FOLDER
 app.config["EDA_FOLDER"] = EDA_FOLDER
 
 @app.route('/ingest-data', methods=['GET', 'POST'])
@@ -49,7 +49,6 @@ def ingest():
 
             # Save uploaded file
             file_path = os.path.join(app.config["UPLOAD_FOLDER"], uploaded_file.filename)
-            uploaded_file.save(file_path)
 
             # Run ingestion
             obj = IngestionManager(
@@ -58,14 +57,8 @@ def ingest():
             )
             df_raw, df_train, df_test = obj.run()
 
-            archive_path = os.path.join(
-                app.config["ARCHIVE_FOLDER"],
-                uploaded_file.filename.rsplit('.', 1)[0],
-                uploaded_file.filename
-            )
             message = (
-                f"✅ File ingested into raw, training, and testing tables. "
-                f"File archived to: {archive_path}"
+                f"""✅ File ingested into raw, training, and testing tables to temp project folder '{app.config["MODEL_RUN_FOLDER"]}/'. """
             )
 
             # Run EDA
@@ -161,8 +154,8 @@ def training_datapoint():
 def predict_datapoint():
     # NOTE: FUTURE PIPELINE UPGRADE --> need to know which model to use in predictions
     # currently have to hardcode "target_feature_name"
-    model_path = os.path.join('artifacts', 'model_Linear Regression.joblib')
-    preproc_path = os.path.join('artifacts', 'pre_proc.joblib')
+    model_path = os.path.join('model_run', 'model_Linear Regression.joblib')
+    preproc_path = os.path.join('model_run', 'pre_proc.joblib')
     predict_pipeline = PredictPipeline(model_path, preproc_path)
 
     if request.method == 'GET':
