@@ -1,6 +1,6 @@
 import pandas as pd
 import snowflake.connector
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class SnowflakeSource(DataSource):
     def load(self):

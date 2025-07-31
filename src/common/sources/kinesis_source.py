@@ -1,7 +1,7 @@
 import boto3
 import json
 import pandas as pd
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class KinesisSource(DataSource):
     def load(self):

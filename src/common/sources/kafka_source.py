@@ -1,6 +1,6 @@
 import pandas as pd
 from confluent_kafka import Consumer, KafkaException
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class KafkaSource(DataSource):
     def load(self):

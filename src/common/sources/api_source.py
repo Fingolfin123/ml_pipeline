@@ -1,6 +1,6 @@
 import requests
 import tempfile
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class APISource(DataSource):
     def load(self):

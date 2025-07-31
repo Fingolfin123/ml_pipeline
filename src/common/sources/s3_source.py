@@ -1,7 +1,7 @@
 import boto3
 import pandas as pd
 import io
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class S3Source(DataSource):
     def load(self):
@@ -39,7 +39,7 @@ class S3Source(DataSource):
 import boto3
 import pandas as pd
 import io
-from common.sources.datasource_base import DataSource
+from src.common.sources.base_source import DataSource
 
 class S3Source(DataSource):
     def read(self):
