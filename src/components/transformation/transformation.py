@@ -57,13 +57,6 @@ class DataTransformation:
             input_array = np.array(input_array)
             combined_array = np.hstack((input_array, target_array))
 
-        print(
-            "input_array shape:",
-            input_array.shape if not issparse(input_array) else input_array.shape,
-        )
-        print("target_array shape:", target_array.shape)
-        print("combined_array shape:", combined_array.shape)
-
         return combined_array
 
     def split_features(self, df):

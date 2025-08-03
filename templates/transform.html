@@ -42,7 +42,7 @@
             </div>
 
             <!-- Form just sends selected feature to backend -->
-            <form action="{{ url_for('training_datapoint') }}" method="post">
+            <form action="{{ url_for('transform_datapoint') }}" method="post">
                 <div class="mb-3">
                     <label class="form-label fw-bold">Select Feature to Evaluate</label>
                     <select class="form-select" name="features" required>
