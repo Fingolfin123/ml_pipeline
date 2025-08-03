@@ -1,4 +1,3 @@
-import os
 import sys
 import pytest
 import numpy as np
@@ -8,34 +7,46 @@ from pathlib import Path
 from src.components.transformation.transformation import DataTransformation
 from src.common.exception import CustomException
 
+
 @pytest.fixture
 def sample_dataframe():
-    return pd.DataFrame({
-        "feature_num": [1.0, 2.0, 3.0, 4.0],
-        "feature_cat": ["A", "B", "A", "B"],
-        "target": [0, 1, 0, 1]
-    })
+    return pd.DataFrame(
+        {
+            "feature_num": [1.0, 2.0, 3.0, 4.0],
+            "feature_cat": ["A", "B", "A", "B"],
+            "target": [0, 1, 0, 1],
+        }
+    )
+
 
 class MockIngestionManager:
     """Mock version of IngestionManager that returns in-memory data."""
+
     def get_model_data(self):
-        df = pd.DataFrame({
-            "feature_num": [1.0, 2.0, 3.0, 4.0],
-            "feature_cat": ["A", "B", "A", "B"],
-            "target": [0, 1, 0, 1]
-        })
+        df = pd.DataFrame(
+            {
+                "feature_num": [1.0, 2.0, 3.0, 4.0],
+                "feature_cat": ["A", "B", "A", "B"],
+                "target": [0, 1, 0, 1],
+            }
+        )
         # Simulate raw, train, test
         return df, df.iloc[:3], df.iloc[3:]
+
 
 def test_data_transformation_run(tmp_path, sample_dataframe, monkeypatch):
     try:
         # Patch IngestionManager inside DataTransformation with mock
         transformer = DataTransformation()
         transformer.data_ingestion = MockIngestionManager()
-        transformer.transformation_config.pre_proc_obj_path = str(tmp_path / "pre_proc.joblib")
+        transformer.transformation_config.pre_proc_obj_path = str(
+            tmp_path / "pre_proc.joblib"
+        )
 
         # Run transformation
-        train_arr, test_arr, preproc_path = transformer.run(target_feature_name="target")
+        train_arr, test_arr, preproc_path = transformer.run(
+            target_feature_name="target"
+        )
 
         # === Assertions ===
         # Check preprocessing object file was saved

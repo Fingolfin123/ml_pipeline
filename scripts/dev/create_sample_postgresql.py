@@ -1,10 +1,4 @@
-import os
-import pandas as pd
-from pathlib import Path
-
-from src.common.utils import get_project_path
-from src.common.sources.postgresql_source import PostgreSQLSource
-from src.common.sources.base_source import DataSource
+from src.common.sources.dev.postgresql_source import PostgreSQLSource
 
 # Configuration for PostgreSQLSource
 config = {
@@ -17,7 +11,7 @@ config = {
     "write_options": {
         "if_exists": "replace",
         "index": False,
-    }
+    },
 }
 
 # Instantiate and generate/write sample

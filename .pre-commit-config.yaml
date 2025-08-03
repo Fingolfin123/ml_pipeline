@@ -1,0 +1,26 @@
+repos:
+  # Ruff - fast Python linter & auto-fixer
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.0  # latest stable
+    hooks:
+      - id: ruff
+        args: [--fix]  # auto-fix issues
+
+  # Black - opinionated code formatter
+  - repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  # Pylint - static analysis (no auto-fix)
+  - repo: https://github.com/PyCQA/pylint
+    rev: pylint-2.17.5
+    hooks:
+      - id: pylint
+        additional_dependencies: [pylint==2.17.5]
+        name: pylint
+        entry: poetry run pylint src
+        language: system
+        types: [python]
+        pass_filenames: false  # Run pylint on entire src folder at once

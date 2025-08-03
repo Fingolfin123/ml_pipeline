@@ -1,6 +1,6 @@
-import os
 import sys
 from pathlib import Path
+
 # import dill
 # import joblib
 
@@ -10,11 +10,11 @@ from pathlib import Path
 # from typing import List, Dict, Any
 
 from src.common.exception import CustomException
-from src.common.monitoring.logger import logging
-from src.common.type_defs import SourceClassMap
 
 
-def get_project_path(directory_name: str = "data", file_name: str = "sample.csv") -> Path:
+def get_project_path(
+    directory_name: str = "data", file_name: str = "sample.csv"
+) -> Path:
     """
     Resolve and return the full path to a project file,
     creating the directory if needed.
@@ -33,10 +33,12 @@ def get_project_path(directory_name: str = "data", file_name: str = "sample.csv"
                 data_dir = parent / directory_name
                 data_dir.mkdir(parents=True, exist_ok=True)
                 return data_dir / file_name
-    except Exception as e:
-        raise CustomException("Could not find project root (missing pyproject.toml)",sys)
+    except Exception:
+        raise CustomException(
+            "Could not find project root (missing pyproject.toml)", sys
+        )
 
-    
+
 # def save_object(file_path, unique_name, obj):
 #     try:
 #         logging.info('Saving Processing Object')
@@ -57,12 +59,12 @@ def get_project_path(directory_name: str = "data", file_name: str = "sample.csv"
 
 #     except Exception as e:
 #         raise CustomException(e, sys)
-    
+
 # def load_object(file_path, unique_name):
 #     try:
 #         logging.info('Loading Processing Object')
 #         dir_path = os.path.dirname(file_path)
-        
+
 #         # Split filename and insert unique name before the extension
 #         base, ext = os.path.splitext(os.path.basename(file_path))
 #         modified_filename = f"{base}_{unique_name}{ext}"
@@ -83,7 +85,7 @@ def get_project_path(directory_name: str = "data", file_name: str = "sample.csv"
 
 # class GetProcessorObj:
 #     def __init__(self, proc_obj_path: str, target_feature_name: str):
-#         self.processor_obj=load_object(file_path=proc_obj_path, unique_name=target_feature_name)        
+#         self.processor_obj=load_object(file_path=proc_obj_path, unique_name=target_feature_name)
 #         self.numerical_features = self.get_numerical_features()
 #         self.categorical_feature_options = self.get_categorical_feature_options()
 
@@ -130,9 +132,8 @@ def get_project_path(directory_name: str = "data", file_name: str = "sample.csv"
 
 #     @property
 #     def feature_options(self):
-#         '''Returns a dictionary of categorical features [dict] and numerical features [list]'''   
+#         '''Returns a dictionary of categorical features [dict] and numerical features [list]'''
 #         return  {
 #             "categorical": self.categorical_feature_options,
 #             "numerical": self.numerical_features
-#         }  
-    
+#         }

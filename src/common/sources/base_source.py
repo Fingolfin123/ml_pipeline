@@ -6,8 +6,9 @@ from pandas import DataFrame
 from src.common.monitoring.logger import logging
 from src.common.exception import CustomException
 
+
 class DataSource:
-    def __init__(self, config: dict={}):
+    def __init__(self, config: dict = {}):
         """
         Initialize the data source with a configuration dictionary.
         """
@@ -22,7 +23,7 @@ class DataSource:
             self.config.update(config)
         return self.config
 
-    def read_flat_file(self, path:str):
+    def read_flat_file(self, path: str):
         # path = self.config["path"] if path is None else path
         logging.info(f"Reading data from: {path}")
         try:
@@ -30,13 +31,13 @@ class DataSource:
         except Exception as e:
             raise CustomException(e, sys)
 
-    def write_flat_file(self, df, path:str = None):
+    def write_flat_file(self, df, path: str = None):
         # path = self.config["path"] if path is None else path
         directory = os.path.dirname(path)
         if directory and not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)  # Create dirs if missing
             logging.info(f"Created directory: {directory}")
-        
+
         logging.info(f"Writing data to: {path}")
         try:
             return self._write(df, path)
@@ -54,9 +55,10 @@ class DataSource:
         Default sample table creation using pandas.
         Override in subclasses for source-specific implementations.
         """
-        return pd.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-            "score": [85.5, 92.0, 78.3]
-        })
-    
+        return pd.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+                "score": [85.5, 92.0, 78.3],
+            }
+        )

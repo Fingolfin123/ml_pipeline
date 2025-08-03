@@ -1,34 +1,45 @@
-import os
 import sys
 import pytest
 import pandas as pd
 from pathlib import Path
-from shutil import rmtree
 
-from src.common.sources.csv_source import CSVSource
-from src.common.sources.json_source import JSONSource
-from src.common.sources.pickle_source import PickleSource
-from src.common.sources.joblib_source import JoblibSource
 
 from src.components.ingestion.ingestion import IngestionManager
 from src.common.type_defs import SourceClassMap
 from src.common.exception import CustomException
 
+
 @pytest.fixture(scope="function")
 def sample_dataframe():
-    return pd.DataFrame({
-        "feature1": [1, 2, 3, 4],
-        "feature2": ["A", "B", "C", "D"],
-        "label": [0, 1, 0, 1]
-    })
+    return pd.DataFrame(
+        {
+            "feature1": [1, 2, 3, 4],
+            "feature2": ["A", "B", "C", "D"],
+            "label": [0, 1, 0, 1],
+        }
+    )
 
-@pytest.mark.parametrize("source_enum, extension, config_overrides", [
-    (SourceClassMap.CSV, ".csv", {"options": {}, "write_options": {"header": True}}),
-    (SourceClassMap.JSON, ".json", {"options": {}, "write_options": {"orient": "records", "indent": 2}}),
-    (SourceClassMap.PICKLE, ".pkl", {"options": {}, "write_options": {}}),
-    (SourceClassMap.JOBLIB, ".joblib", {"options": {}, "write_options": {}}),
-])
-def test_ingestion_manager_end_to_end(tmp_path, sample_dataframe, source_enum, extension, config_overrides):
+
+@pytest.mark.parametrize(
+    "source_enum, extension, config_overrides",
+    [
+        (
+            SourceClassMap.CSV,
+            ".csv",
+            {"options": {}, "write_options": {"header": True}},
+        ),
+        (
+            SourceClassMap.JSON,
+            ".json",
+            {"options": {}, "write_options": {"orient": "records", "indent": 2}},
+        ),
+        (SourceClassMap.PICKLE, ".pkl", {"options": {}, "write_options": {}}),
+        (SourceClassMap.JOBLIB, ".joblib", {"options": {}, "write_options": {}}),
+    ],
+)
+def test_ingestion_manager_end_to_end(
+    tmp_path, sample_dataframe, source_enum, extension, config_overrides
+):
     try:
         df = sample_dataframe
         test_path = tmp_path / f"sample{extension}"
@@ -42,6 +53,7 @@ def test_ingestion_manager_end_to_end(tmp_path, sample_dataframe, source_enum, e
             df.to_pickle(test_path)
         elif extension == ".joblib":
             import joblib
+
             joblib.dump(df, test_path)
 
         # Run the ingestion manager using new method

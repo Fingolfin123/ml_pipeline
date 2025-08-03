@@ -1,7 +1,5 @@
-import os
-import sys
-import pandas as pd
 from src.common.type_defs import SourceClassMap
+
 
 class DataSourceIO:
     # def __init__(self, source_enum: SourceClassMap, source_config: dict):
@@ -11,8 +9,7 @@ class DataSourceIO:
 
     #     # Initialize the source class object
     #     self.source_class = self.source_enum.cls
-    #     self.source = self.source_class(self.source_config)     
-
+    #     self.source = self.source_class(self.source_config)
 
     def set_source_from_config(self, source_enum: SourceClassMap, source_config: dict):
         """
@@ -28,8 +25,9 @@ class DataSourceIO:
         # Initialize the source class object
         source_class = source_enum.cls
         source = source_class(source_config)
+        return source
 
-    def set_source_from_path(self, path:str):
+    def set_source_from_path(self, path: str):
         """
         Initializes the ingestion source.
 
@@ -42,7 +40,7 @@ class DataSourceIO:
         source = source_class()
         return source
 
-    def read_flat_file(self, path:str):
+    def read_flat_file(self, path: str):
         """
         Initializes the ingestion source.
 
@@ -53,7 +51,7 @@ class DataSourceIO:
         df = source.read_flat_file(path)
         return df
 
-    def write_flat_file(self, df, path:str):
+    def write_flat_file(self, df, path: str):
         """
         Initializes the ingestion source.
 
