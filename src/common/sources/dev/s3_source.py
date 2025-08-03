@@ -1,0 +1,67 @@
+import boto3
+import pandas as pd
+import io
+from src.common.sources.base_source import DataSource
+
+
+class S3Source(DataSource):
+    def read(self):
+        bucket = self.config["bucket"]
+        key = self.config["key"]
+        aws_access_key_id = self.config.get("aws_access_key_id")
+        aws_secret_access_key = self.config.get("aws_secret_access_key")
+        aws_session_token = self.config.get("aws_session_token")
+        region_name = self.config.get("region_name")
+        file_type = self.config.get("file_type", "csv")
+        read_options = self.config.get("read_options", {})
+
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            region_name=region_name,
+        )
+        s3 = session.client("s3")
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        data = obj["Body"].read()
+
+        if file_type == "csv":
+            return pd.read_csv(io.BytesIO(data), **read_options)
+        elif file_type == "json":
+            return pd.read_json(io.BytesIO(data), **read_options)
+        else:
+            raise ValueError(f"Unsupported file_type: {file_type}")
+
+    def write(self, df: pd.DataFrame):
+        bucket = self.config["bucket"]
+        key = self.config["key"]
+        file_type = self.config.get("file_type", "csv")
+        aws_access_key_id = self.config.get("aws_access_key_id")
+        aws_secret_access_key = self.config.get("aws_secret_access_key")
+        aws_session_token = self.config.get("aws_session_token")
+        region_name = self.config.get("region_name")
+        write_options = self.config.get("write_options", {})  # e.g., index=False
+
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            region_name=region_name,
+        )
+        s3 = session.client("s3")
+
+        buffer = io.BytesIO()
+        if file_type == "csv":
+            df.to_csv(buffer, **write_options)
+        elif file_type == "json":
+            df.to_json(buffer, **write_options)
+        else:
+            raise ValueError(f"Unsupported file_type: {file_type}")
+
+        buffer.seek(0)
+        s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())
+
+    def generate_sample_table(self):
+        sample_df = super().generate_sample_table()
+        print("S3 source does not support writing sample data.")
+        return sample_df
