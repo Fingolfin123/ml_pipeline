@@ -33,12 +33,24 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction --no-ansi
 
-      # 6️⃣ Run pylint (fail fast on lint errors)
+      # 6️⃣ Install code formatters & linters
+      - name: Install lint tools
+        run: poetry add --dev pylint ruff black
+
+      # 7️⃣ Auto-fix style issues with Ruff
+      - name: Auto-fix with Ruff
+        run: poetry run ruff check . --fix
+
+      # 8️⃣ Format with Black (ensures consistent formatting)
+      - name: Format code with Black
+        run: poetry run black .
+
+      # 9️⃣ Run pylint after fixing
       - name: Run pylint
         run: poetry run pylint src
-        continue-on-error: false  # Fail if linting fails
+        continue-on-error: false  # Fail if linting still fails
 
-      # 7️⃣ Run pytest with coverage
+      # 🔟 Run pytest with coverage
       - name: Run tests with coverage
         run: |
           poetry run pytest \
