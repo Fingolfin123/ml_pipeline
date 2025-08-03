@@ -1,0 +1,49 @@
+name: Lint and Test
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3️⃣ Install Poetry
+      - name: Install Poetry
+        run: pip install poetry
+
+      # 4️⃣ Configure Poetry to install into system env (not venv)
+      - name: Configure Poetry
+        run: poetry config virtualenvs.create false
+
+      # 5️⃣ Install dependencies (including dev dependencies)
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
+
+      # 6️⃣ Run pylint (fail fast on lint errors)
+      - name: Run pylint
+        run: poetry run pylint src
+        continue-on-error: false  # Fail if linting fails
+
+      # 7️⃣ Run pytest with coverage
+      - name: Run tests with coverage
+        run: |
+          poetry run pytest \
+            --disable-warnings \
+            --maxfail=1 \
+            --cov=src \
+            --cov-report=term-missing \
+            -v
