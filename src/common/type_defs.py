@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 
 from src.common.sources.csv_source import CSVSource
@@ -20,6 +21,16 @@ class SourceClassMap(Enum):
         self.cls = cls
 
     @classmethod
+    def from_path(cls, filepath: str):
+        """Return enum member based on file filepath."""
+        ext = os.path.splitext(filepath)[-1].lower().lstrip('.')
+
+        for member in cls:
+            if member.ext == ext:
+                return member
+        raise ValueError(f"Unsupported file extension: {ext}")
+    
+    @classmethod
     def from_extension(cls, ext: str):
         """Return enum member based on file extension."""
         ext = ext.lower()
@@ -27,4 +38,4 @@ class SourceClassMap(Enum):
             if member.ext == ext:
                 return member
         raise ValueError(f"Unsupported file extension: {ext}")
-
+    

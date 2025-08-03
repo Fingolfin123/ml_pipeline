@@ -6,9 +6,9 @@ This module contains logic for cleaning, normalizing, enriching, and restructuri
 
 ## 🧹 Data Cleaning
 
-- [ ] Handle missing values (e.g., imputation, removal)
-- [ ] Detect and treat outliers
-- [ ] Remove or flag duplicates
+- [X] Handle missing values (e.g., imputation, removal)
+- [X] Detect and treat outliers
+- [X] Remove or flag duplicates
 - [ ] Validate schema and data types
 - [ ] Correct inconsistent formatting (e.g., casing, punctuation)
 

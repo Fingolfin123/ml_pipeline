@@ -6,7 +6,7 @@ class CSVSource(DataSource):
         options = self.config.get("options", {})
         return pd.read_csv(path, **options)
     
-    def _write(self, df, path:str):
+    def _write(self, df, path:str):  
         options = self.config.get("write_options", {})
         df.to_csv(path, index=False, **options)
         

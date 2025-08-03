@@ -44,15 +44,10 @@ def test_ingestion_manager_end_to_end(tmp_path, sample_dataframe, source_enum, e
             import joblib
             joblib.dump(df, test_path)
 
-        # Run the ingestion manager
-        manager = IngestionManager(
-            source_enum=source_enum,
-            source_config={
-                "path": str(test_path),
-                **config_overrides
-            }
-        )
-
+        # Run the ingestion manager using new method
+        manager = IngestionManager()
+        manager.set_ingest_path(str(test_path))
+        # manager.set_source_from_config(source_enum, config_overrides)
         df_raw, df_train, df_test = manager.run()
 
         # Check all files are created

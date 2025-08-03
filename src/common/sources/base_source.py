@@ -7,33 +7,31 @@ from src.common.monitoring.logger import logging
 from src.common.exception import CustomException
 
 class DataSource:
-    def __init__(self, config: dict):
+    def __init__(self, config: dict={}):
         """
         Initialize the data source with a configuration dictionary.
         """
         self.config = config
-        self.source_type = None
 
-    def update_io_config(self, override_config: dict = None):
+    def set_io_config(self, config: dict = None):
         """
-        Merge self.config with an optional override_config dict.
+        Set self.config with an config dict.
         """
-        base_config = self.config.copy()
-        if override_config:
-            base_config.update(override_config)
-        return base_config
+        self.config = config
+        if config:
+            self.config.update(config)
+        return self.config
 
-
-    def read(self, path:str = None):
-        path = self.config["path"] if path is None else path
+    def read_flat_file(self, path:str):
+        # path = self.config["path"] if path is None else path
         logging.info(f"Reading data from: {path}")
         try:
             return self._read(path)
         except Exception as e:
             raise CustomException(e, sys)
 
-    def write(self, df, path:str = None):
-        path = self.config["path"] if path is None else path
+    def write_flat_file(self, df, path:str = None):
+        # path = self.config["path"] if path is None else path
         directory = os.path.dirname(path)
         if directory and not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)  # Create dirs if missing

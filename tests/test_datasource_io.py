@@ -11,6 +11,7 @@ from src.common.sources.json_source import JSONSource
 from src.common.sources.pickle_source import PickleSource
 from src.common.sources.joblib_source import JoblibSource  # import Joblib source
 
+
 @pytest.mark.parametrize("source_class, extension, config_overrides", [
     (CSVSource, ".csv", {
         "options": {},
@@ -31,6 +32,7 @@ from src.common.sources.joblib_source import JoblibSource  # import Joblib sourc
 ])
 def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overrides):
     logging.info("Running DataSource Roundtrip Test")    
+
     try:
         # Create a simple DataFrame for testing
         df = pd.DataFrame({
@@ -42,16 +44,16 @@ def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overr
         # Set file path
         file_path = tmp_path / f"test{extension}"
 
-        # Build config
-        config = {
+        # Initialize source without config, then set config
+        source = source_class()
+        source.config = {
             "path": str(file_path),
             **config_overrides
         }
 
-        # Initialize and run roundtrip
-        source = source_class(config=config)
-        source.write(df, config["path"])
-        result_df = source.read(config["path"])
+        # Write and read back
+        source.write_flat_file(df, str(file_path))
+        result_df = source.read_flat_file(str(file_path))
 
         # Assert roundtrip data matches original
         pd.testing.assert_frame_equal(
@@ -59,6 +61,7 @@ def test_datasource_io_roundtrip(tmp_path, source_class, extension, config_overr
             result_df.reset_index(drop=True),
             check_dtype=False
         )
-    
+
     except Exception as e:
         raise CustomException(e, sys)
+

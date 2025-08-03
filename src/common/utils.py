@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 # import dill
 # import joblib
 
@@ -10,7 +11,8 @@ import sys
 
 from src.common.exception import CustomException
 from src.common.monitoring.logger import logging
-from pathlib import Path
+from src.common.type_defs import SourceClassMap
+
 
 def get_project_path(directory_name: str = "data", file_name: str = "sample.csv") -> Path:
     """
@@ -24,15 +26,17 @@ def get_project_path(directory_name: str = "data", file_name: str = "sample.csv"
     Returns:
         Path: Full path to the project file inside the target directory
     """
-    current = Path(__file__).resolve()
-    for parent in current.parents:
-        if (parent / "pyproject.toml").exists():
-            data_dir = parent / directory_name
-            data_dir.mkdir(parents=True, exist_ok=True)
-            return data_dir / file_name
+    try:
+        current = Path(__file__).resolve()
+        for parent in current.parents:
+            if (parent / "pyproject.toml").exists():
+                data_dir = parent / directory_name
+                data_dir.mkdir(parents=True, exist_ok=True)
+                return data_dir / file_name
+    except Exception as e:
+        raise CustomException("Could not find project root (missing pyproject.toml)",sys)
 
-    raise RuntimeError("Could not find project root (missing pyproject.toml)")
-
+    
 # def save_object(file_path, unique_name, obj):
 #     try:
 #         logging.info('Saving Processing Object')
