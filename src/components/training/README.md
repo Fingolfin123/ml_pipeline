@@ -1,3 +1,42 @@
+# Model Training Pipeline with Auto Feature Cleaning & Dynamic Hyperparameter Tuning
+
+## Overview
+This pipeline automatically:
+1. Cleans and preprocesses features before training.
+2. Dynamically adjusts hyperparameter search spaces based on dataset size.
+3. Runs Bayesian optimization (`BayesSearchCV`) to find the best model parameters.
+4. Reports R² scores for all tested models.
+
+## Feature Cleaning Steps
+1. **Remove near-zero variance features**
+   - Uses `VarianceThreshold` to drop columns with constant values.
+   
+2. **Remove highly correlated features**
+   - Calculates correlation matrix and drops one column from any pair with correlation > **0.95**.
+
+3. **Scale numeric features**
+   - Standardizes features to mean=0 and variance=1 (required for models like KNN, Linear Regression, and boosting algorithms).
+
+## Dynamic Hyperparameter Tuning
+Hyperparameter ranges are automatically adjusted based on:
+- **Number of features** → affects `max_depth`
+- **Number of rows** → affects `n_estimators`
+- **Search range expansion** for `learning_rate` when dataset grows.
+
+Example adjustments:
+```python
+RandomForest:
+  n_estimators: 100 → up to 1000
+  max_depth: 5 → up to 30
+  min_samples_split: 2 → up to 20
+
+GradientBoosting:
+  n_estimators: 100 → up to 1000
+  learning_rate: 0.005 → 0.3
+  max_depth: 3 → up to 30
+
+
+
 # 🎯 Model Training Module Checklist
 
 This module contains all logic for training machine learning models, including dataset preparation, training loop, hyperparameter tuning, checkpointing, and integration with experiment tracking tools.

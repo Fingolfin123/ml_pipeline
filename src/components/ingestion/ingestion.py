@@ -1,10 +1,12 @@
 import os
 import sys
+import pandas as pd
+import numpy as np
 from src.common.exception import CustomException
 from src.common.monitoring.logger import logging
 from src.common.datasource import DataSourceIO
 from src.components.type_defs import TraingingParams
-
+from scipy import sparse
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
@@ -62,14 +64,27 @@ class IngestionManager:
 
     def get_model_data(self):
         """
-        Loads a saved dataset from model_run/ using self.source.read
-        Returns: DataFrame
+        Loads a saved dataset from model_run/ using self.source.read.
+        Ensures that returned objects are regular Pandas DataFrames instead of sparse matrices.
         """
         logging.info("Loading ingested model run data")
         try:
             df_raw = self.source.read_flat_file(self.ingestion_config.raw_data_path)
             df_train = self.source.read_flat_file(self.ingestion_config.train_data_path)
             df_test = self.source.read_flat_file(self.ingestion_config.test_data_path)
+
+            # Convert sparse to dense pandas
+            def to_dense_df(data):
+                if sparse.issparse(data):
+                    data = data.toarray()  # Convert sparse → dense NumPy
+                if isinstance(data, np.ndarray):
+                    data = pd.DataFrame(data)
+                return data
+
+            df_raw = to_dense_df(df_raw)
+            df_train = to_dense_df(df_train)
+            df_test = to_dense_df(df_test)
+
         except Exception as e:
             raise CustomException(e, sys)
 
@@ -87,7 +102,9 @@ class IngestionManager:
 if __name__ == "__main__":
     obj = IngestionManager()
     obj.set_ingest_path("data/air_quality_health_dataset.csv")
+    # obj.set_ingest_path("data/dev_ex1_student_performance.csv")
     df_raw, df_train, df_test = obj.run()
+    print(type(df_train))
     print(df_raw)
     print(df_train)
     print(df_test)
