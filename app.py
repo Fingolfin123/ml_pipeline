@@ -17,7 +17,6 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
-
 UPLOAD_FOLDER = "data"
 MODEL_RUN_FOLDER = "model_run"
 EDA_FOLDER = "static/eda_results"
@@ -53,14 +52,11 @@ def ingest():
             )
 
             # Run ingestion
-            obj = IngestionManager()
-            obj.set_ingest_path(path=file_path)
-            df_raw, df_train, df_test = obj.run()
+            data_ingestor = IngestionManager(ingest_path=file_path)
 
-            message = f"""✅ File ingested into raw, training, and testing tables to temp project folder '{app.config["MODEL_RUN_FOLDER"]}/'. """
-
-            # Run EDA
-            eda_head, eda_shape, eda_images, eda_summary = run_full_eda(df_raw)
+            # Get the raw data
+            data_ingest_feedback = data_ingestor.run()
+            message = f"""✅ File ingested with EDA into temp project folder '{app.config["MODEL_RUN_FOLDER"]}/'. """
 
         else:
             message = "⚠️ No file selected."
@@ -68,58 +64,12 @@ def ingest():
     return render_template(
         "ingest.html",
         message=message,
-        eda_head=eda_head,
-        eda_shape=eda_shape,
-        eda_images=eda_images,
-        eda_summary=eda_summary,
+        eda_head=data_ingest_feedback['eda_head']
+        eda_shape=data_ingest_feedback['eda_shape']
+        eda_images=data_ingest_feedback['eda_images']
+        eda_summary=data_ingest_feedback['eda_summary']
     )
 
-def run_full_eda(df: pd.DataFrame):
-    os.makedirs(app.config["EDA_FOLDER"], exist_ok=True)
-    eda_images = []
-
-    # Show first few rows
-    eda_head = df.head().to_html(classes="table table-striped table-bordered", border=0)
-
-    # Show shape
-    eda_shape = f"Rows: {df.shape[0]}, Columns: {df.shape[1]}"
-
-    # Summary statistics
-    eda_df = df.describe(include="all")
-
-    # Add a row for null counts
-    eda_df.loc["null_count"] = df.isnull().sum()
-
-    # Convert to HTML
-    eda_summary = eda_df.to_html(classes="table table-striped table-bordered", border=0)
-
-    # Numeric columns
-    numeric_cols = df.select_dtypes(include="number").columns
-
-    for num_col in numeric_cols:
-        plt.figure(figsize=(8, 6))
-        sns.histplot(df[num_col], kde=True, color="blue")
-        plt.title(f"Distribution of {num_col}")
-        filename = f"{num_col}_distribution.png"
-        save_path = os.path.join(app.config["EDA_FOLDER"], filename)
-        plt.savefig(save_path)
-        plt.close()
-
-        # Store relative path for HTML
-        eda_images.append(f"static/eda_results/{filename}")
-
-    if len(numeric_cols) > 1:
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(df[numeric_cols].corr(), annot=True, cmap="coolwarm")
-        filename = "correlation_heatmap.png"
-        save_path = os.path.join(app.config["EDA_FOLDER"], filename)
-        plt.savefig(save_path)
-        plt.close()
-
-        # Store relative path for HTML
-        eda_images.append(f"static/eda_results/{filename}")
-
-    return eda_head, eda_shape, eda_images, eda_summary
 
 @app.route("/transform-data", methods=["GET", "POST"])
 def transform_datapoint():
@@ -159,7 +109,6 @@ def transform_datapoint():
 
     # GET request: Just show dropdown without message
     return render_template("transform.html", features=feature_options)
-
 
 @app.route("/train-data", methods=["GET", "POST"])
 def training_datapoint():

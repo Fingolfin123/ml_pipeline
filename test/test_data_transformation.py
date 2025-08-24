@@ -22,7 +22,8 @@ def sample_dataframe():
 class MockIngestionManager:
     """Mock version of IngestionManager that returns in-memory data."""
 
-    def get_model_data(self):
+    def get_model_data(self, data_set):
+        data_set = None # Not used here
         df = pd.DataFrame(
             {
                 "feature_num": [1.0, 2.0, 3.0, 4.0],
@@ -30,9 +31,16 @@ class MockIngestionManager:
                 "target": [0, 1, 0, 1],
             }
         )
-        # Simulate raw, train, test
-        return df, df.iloc[:3], df.iloc[3:]
+        # Simulate just the raw data here
+        return df
 
+    def save_train_test(self, df):
+        train_set, test_set = df.iloc[:3], df.iloc[3:]
+
+        return (
+            train_set,
+            test_set
+        )
 
 def test_data_transformation_run(tmp_path, sample_dataframe, monkeypatch):
     try:

@@ -13,12 +13,17 @@ from src.common.exception import CustomException
 from src.common.monitoring.logger import logging
 from src.common.datasource import DataSourceIO
 from src.components.ingestion.ingestion import IngestionManager
+from src.components.features.feature_selection import FeatureSelector
 
 
 @dataclass
 class DataTransformConfig:
     pre_proc_obj_path: str = os.path.join("model_run", "pre_proc.joblib")
-
+    timeseries_toggle = False
+    correlation_factor = 0.9
+    mutual_info_filter_count = 15
+    apply_outlier_clipping = False
+    correct_numeric_skewness = False
 
 class DataTransformation:
     def __init__(self):
@@ -26,9 +31,12 @@ class DataTransformation:
         self.source = DataSourceIO()
         self.transformation_config = DataTransformConfig()
         self.data_ingestion = IngestionManager()
+        self.feature_selection = FeatureSelector(
+            self.transformation_config          
+        )
 
     def get_raw_features(self):
-        df_raw, df_train, df_test = self.data_ingestion.get_model_data()
+        df_raw = self.data_ingestion.get_model_data("raw")
         categorical_features, numerical_features = self.split_features(df_raw)
 
         # Add suffixes for dropdown display
@@ -37,6 +45,14 @@ class DataTransformation:
         ]
 
         return feature_options
+
+    def clean_raw_data(self, df):
+        # Remove duplicates early
+        before = len(df)
+        df = df.drop_duplicates()
+        logging.info(f"Removed {before - len(df)} duplicate rows") 
+
+        return df 
 
     def combine_input_target_arrays(self, input_array, target_array):
         """
@@ -94,11 +110,6 @@ class DataTransformation:
         logging.info("Obtaining Processing Object")
 
         try:
-            # Remove duplicates early
-            before = len(df)
-            df = df.drop_duplicates()
-            logging.info(f"Removed {before - len(df)} duplicate rows")
-
             # Validate schema (basic: ensure target exists)
             if target_feature_name not in df.columns:
                 raise ValueError(
@@ -112,27 +123,27 @@ class DataTransformation:
             # Split features and target
             X, y = self.split_input_X_and_target_y(df, target_feature_name)
             categorical_features, numeric_features = self.split_features(X)
-            print(categorical_features)
-            print(numeric_features)
 
-            # Outlier treatment: IQR clipping for numeric features
-            logging.info(
-                "Applying IQR clipping for outlier values in numerical features"
-            )
-            for col in numeric_features:
-                Q1 = X[col].quantile(0.25)
-                Q3 = X[col].quantile(0.75)
-                IQR = Q3 - Q1
-                lower_bound = Q1 - 1.5 * IQR
-                upper_bound = Q3 + 1.5 * IQR
-                X[col] = X[col].clip(lower=lower_bound, upper=upper_bound)
+            if self.transformation_config.apply_outlier_clipping:
+                # Outlier treatment: IQR clipping for numeric features
+                logging.info(
+                    "Applying IQR clipping for outlier values in numerical features"
+                )
+                for col in numeric_features:
+                    Q1 = X[col].quantile(0.25)
+                    Q3 = X[col].quantile(0.75)
+                    IQR = Q3 - Q1
+                    lower_bound = Q1 - 1.5 * IQR
+                    upper_bound = Q3 + 1.5 * IQR
+                    X[col] = X[col].clip(lower=lower_bound, upper=upper_bound)
 
-            # Domain-specific: log transform skewed numeric features
-            skewness = X[numeric_features].skew().abs()
-            skewed_cols = skewness[skewness > 1].index.tolist()
-            logging.info(f"Applying log1p to skewed columns: {skewed_cols}")
-            for col in skewed_cols:
-                X[col] = np.log1p(X[col])
+            if self.transformation_config.correct_numeric_skewness:
+                # Domain-specific: log transform skewed numeric features
+                skewness = X[numeric_features].skew().abs()
+                skewed_cols = skewness[skewness > 1].index.tolist()
+                logging.info(f"Applying log1p to skewed columns: {skewed_cols}")
+                for col in skewed_cols:
+                    X[col] = np.log1p(X[col])
 
             # Numerical pipeline
             logging.info(
@@ -173,7 +184,6 @@ class DataTransformation:
             self.feature_metadata = {
                 "categorical_features": categorical_features,
                 "numeric_features": numeric_features,
-                "skewed_cols": skewed_cols,
             }
 
             return preprocessor
@@ -185,7 +195,18 @@ class DataTransformation:
         logging.info("Transforming Model Input")
         try:
             # Get ingestion data
-            df_raw, df_train, df_test = self.data_ingestion.get_model_data()
+            df_raw = self.data_ingestion.get_model_data('raw')
+            print(df_raw)
+            # Drop duplicates if present
+            df_preprocessed = self.clean_raw_data(df_raw)
+            print('Hiiiiiii')
+            print(df_preprocessed)
+            
+            # Remove features that do not contribute to prediction
+            df_preprocessed = self.feature_selection.run(df_preprocessed, target_feature_name)
+
+            # Split out train and test sets
+            df_train, df_test = self.data_ingestion.save_train_test(df_preprocessed)
 
             # Separate input matrix and predicted output vector
             X_train, y_train = self.split_input_X_and_target_y(
@@ -195,15 +216,16 @@ class DataTransformation:
                 df_test, target_feature_name
             )
 
-            # Get preprocessir object to fit model for numerical and categorical features
+            # Get preprocessor object and fit model for numerical and categorical features
             preprocessor_obj = self.get_transformer_obj(df_raw, target_feature_name)
             X_train_feature = preprocessor_obj.fit_transform(X_train)
             X_test_feature = preprocessor_obj.transform(X_test)
 
-            # Separate input matrix and mredicted output vector into train and test sets
+            # Separate input matrix and predicted output vector into train and test sets
             train_arr = self.combine_input_target_arrays(X_train_feature, y_train)
             test_arr = self.combine_input_target_arrays(X_test_feature, y_test)
 
+            # Save preprocessor object for downstream use
             self.source.write_flat_file(
                 preprocessor_obj, path=self.transformation_config.pre_proc_obj_path
             )
