@@ -7,7 +7,7 @@ from src.common.exception import CustomException
 from src.common.monitoring.logger import logging
 from src.common.datasource import DataSourceIO
 from src.components.type_defs import TraingingParams
-
+from scipy import sparse
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
@@ -125,8 +125,8 @@ class IngestionManager:
 
     def get_model_data(self, data_set):
         """
-        Loads a saved dataset from model_run/ using self.source.read
-        Returns: DataFrame
+        Loads a saved dataset from model_run/ using self.source.read.
+        Ensures that returned objects are regular Pandas DataFrames instead of sparse matrices.
         """
         logging.info("Loading ingested model run data")
         try:

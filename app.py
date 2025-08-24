@@ -75,7 +75,7 @@ def ingest():
 def transform_datapoint():
     # Initialize DataTransformation and get available features for dropdown
     data_transformation = DataTransformation()
-    feature_options = data_transformation.get_raw_features()
+    feature_options, categorical_features, numerical_features = data_transformation.get_raw_features()
 
     if request.method == "POST":
         # Get selected feature from HTML dropdown
@@ -116,7 +116,7 @@ def training_datapoint():
     # get_raw_features should not be called multiple times
     # Get available features to add as options to html drop down selector
     data_transformation = DataTransformation()
-    feature_options = data_transformation.get_raw_features()
+    feature_options, categorical_features, numerical_features = data_transformation.get_raw_features()
     if request.method == "POST":
         # Get selected feature from html drop down selection
         selected_feature = request.form.get("features")
