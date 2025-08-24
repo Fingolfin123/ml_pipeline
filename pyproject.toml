@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Modular, reusable components for building end-to-end ML workflows."
 authors = ["ben <bengisla123@gmail.com>"]
 readme = "README.md"
-packages = [{ include = "." }]
+packages = [{include = "ml_pipeline", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9"

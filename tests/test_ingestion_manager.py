@@ -57,21 +57,23 @@ def test_ingestion_manager_end_to_end(
             joblib.dump(df, test_path)
 
         # Run the ingestion manager using new method
-        manager = IngestionManager()
-        manager.set_ingest_path(str(test_path))
+        manager = IngestionManager(str(test_path))
+
         # manager.set_source_from_config(source_enum, config_overrides)
-        df_raw, df_train, df_test = manager.run()
+        return_dict = manager.run()
+        df_raw = return_dict['df_raw']
+        # df_train, df_test = manager.save_train_test(df_raw)
 
         # Check all files are created
         assert Path(manager.ingestion_config.raw_data_path).exists()
-        assert Path(manager.ingestion_config.train_data_path).exists()
-        assert Path(manager.ingestion_config.test_data_path).exists()
+        # assert Path(manager.ingestion_config.train_data_path).exists()
+        # assert Path(manager.ingestion_config.test_data_path).exists()
 
         # Validate DataFrame output
         assert isinstance(df_raw, pd.DataFrame)
-        assert isinstance(df_train, pd.DataFrame)
-        assert isinstance(df_test, pd.DataFrame)
-        assert len(df_train) + len(df_test) == len(df_raw)
+        # assert isinstance(df_train, pd.DataFrame)
+        # assert isinstance(df_test, pd.DataFrame)
+        # assert len(df_train) + len(df_test) == len(df_raw)
 
     except Exception as e:
         raise CustomException(e, sys)
